@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+
+var puppeteer = require('puppeteer');
+var fs = require('fs');
+
+// var remoteId = 'poké-bar-san-francisco-2';
+var remoteId = process.argv[2];
+
+async function getCurrentReviews(page) {
+    return await page.evaluate(function() {
+        var reviewElements = document.getElementsByClassName("review-wrapper")
+        var reviews = [];
+
+        for (var i = 1; i < reviewElements.length; i++) {
+            var element = reviewElements[i];
+
+            var content = element.getElementsByTagName('p')[0].innerText;
+            var rating = parseFloat(element.querySelector('div.i-stars').title);
+            var date = element.querySelector('span.rating-qualifier').innerText.split(" ")[0];
+
+            reviews.push({
+                content: content,
+                rating: rating,
+                date: date
+            })
+        }
+
+        return reviews;
+    });
+};
+
+async function getAllReviews(page, pageNumber, all=[]) {
+    var current = await getCurrentReviews(page);
+    var reviews = all.concat(current);
+
+    var next = await page.$('a.next');
+
+    if (next !== null) {
+        var wait = page.waitForFunction('document.querySelector("div.page-option.current").innerText === "' + (pageNumber + 1) + '"');
+        page.click('a.next');
+        try {
+            await wait;
+        } catch (e) {
+            return {error: {message: "waiting for div.current timed out", pageNumber: pageNumber}};
+        }
+
+        return getAllReviews(page, pageNumber + 1, reviews);
+    } else {
+        return reviews;
+    }
+};
+
+(async function () {
+    var browser = await puppeteer.launch({
+        headless: false,
+        slowMo: 10
+    });
+
+    var page = await browser.newPage();
+    await page.goto('https://www.yelp.com/biz/' + remoteId, {waitUntil: 'networkidle2'});
+
+    var reviews = await getAllReviews(page, 1);
+    console.log(JSON.stringify({reviews: reviews}));
+    await browser.close();
+})();

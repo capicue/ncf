@@ -1,6 +1,7 @@
 from orator import Model
 from orator.orm import belongs_to
-import models.business
+
+import database.business
 
 
 class Review(Model):
@@ -9,4 +10,4 @@ class Review(Model):
 
     @belongs_to
     def business(self):
-        return models.business.Business
+        return database.business.Business

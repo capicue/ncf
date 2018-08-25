@@ -1,20 +1,9 @@
 from orator import DatabaseManager, Model
 import csv
 
-from models.business import Business
-from models.category import Category
+from database import Business, Category
 
-DATA_SET = 'nyCoffee'
-
-config = {
-    'sqlite': {
-        'driver': 'sqlite',
-        'database': 'database/yelp.db'
-    }
-}
-
-db = DatabaseManager(config)
-Model.set_connection_resolver(db)
+DATA_SET = 'sfRestaurants'
 
 with open(f'data/{DATA_SET}.csv', 'r') as csvfile:
     reader = csv.DictReader(csvfile)

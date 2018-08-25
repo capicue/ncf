@@ -1,2 +1,7 @@
 **/.env
 **/*.db
+yelp/data/
+__pycache__
+yelp/database/yelp
+node_modules
+yelp/database/yelp.sql

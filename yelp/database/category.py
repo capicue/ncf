@@ -1,6 +1,7 @@
 from orator import Model
 from orator.orm import belongs_to_many
-import models.business
+
+import database.business
 
 
 class Category(Model):
@@ -9,4 +10,4 @@ class Category(Model):
 
     @belongs_to_many('categorizations')
     def businesses(self):
-        return models.business.Business
+        return database.business.Business

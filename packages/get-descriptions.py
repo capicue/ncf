@@ -1,3 +1,4 @@
+
 import csv
 import requests
 
@@ -12,14 +13,14 @@ def description(packageName):
     else:
         return ''
 
-def addDescription(package):
+def add_description(package):
     package['description'] = description(package['name'])
     return package
 
 for package in packages:
     if not ('description' in package):
         print(package['name'])
-        addDescription(package)
+        add_description(package)
 
 with open('packages.csv', 'w') as csvfile:
     fieldnames = ['name', 'downloads', 'description']
@@ -28,3 +29,7 @@ with open('packages.csv', 'w') as csvfile:
     writer.writeheader()
     for package in packages:
         writer.writerow(package)
+
+
+
+

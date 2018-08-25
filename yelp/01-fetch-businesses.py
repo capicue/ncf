@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from yarl import URL
 import csv
 
-DATA_SET = 'nyCoffee'
+DATA_SET = 'sfRestaurants'
 
 load_dotenv('.env')
 
@@ -13,8 +13,23 @@ API_KEY = os.environ['API_KEY']
 PARAMS = {
     'nyCoffee': {
         'origin': (40.72, -74.02),
-        'padding': 30,
+        'padding': 60,
         'categories': 'coffee'
+    },
+    'sfCoffee': {
+        'origin': (37.75, -122.45),
+        'padding': 20,
+        'categories': 'coffee'
+    },
+    'toledoRestaurants': {
+        'origin': (41.65,-83.54),
+        'padding': 20,
+        'categories': 'restaurants'
+    },
+    'sfRestaurants': {
+        'origin': (37.75, -122.45),
+        'padding': 20,
+        'categories': 'restaurants'
     }
 }
 
@@ -38,7 +53,7 @@ def traverse(n):
         for offset in radius(r):
             yield offset
 
-def searchUrl(params):
+def search_url(params):
     return URL.build(
         scheme='https',
         host='api.yelp.com',
@@ -46,7 +61,7 @@ def searchUrl(params):
         query=params
     )
 
-def businessInfo(business):
+def business_info(business):
     return {
         'id': business['id'],
         'name': business['name'],
@@ -60,14 +75,14 @@ def businessInfo(business):
         'phone': business['phone']
     }
 
-def getAll(location, page=0):
+def get_all(location, page=0):
     limit = 50
 
     response = requests.get(
-        searchUrl({
+        search_url({
             'latitude':str(location[0]),
             'longitude':str(location[1]),
-            'radius':'1000',
+            'radius':'500',
             'limit':str(limit),
             'categories':CATEGORIES
         }),
@@ -76,14 +91,14 @@ def getAll(location, page=0):
 
     assert response['total'] < 1000, f'Too many results for ({location[0]}, {location[1]})'
 
-    businesses = list(map(businessInfo, response['businesses']))
+    businesses = list(map(business_info, response['businesses']))
 
     lastPage = (page + 1) * limit >= response['total']
 
     if lastPage:
         return businesses
     else:
-        return businesses + getAll(location, page+1)
+        return businesses + get_all(location, page+1)
 
 with open(f'data/{DATA_SET}.csv', 'w') as csvfile:
     fieldnames = ['id', 'name', 'review_count', 'categories', 'rating',
@@ -95,9 +110,9 @@ with open(f'data/{DATA_SET}.csv', 'w') as csvfile:
         print(offset)
 
         location = (
-            round(ORIGIN[0] + (offset[0]/100), 2),
-            round(ORIGIN[1] + (offset[1]/100), 2)
+            round(ORIGIN[0] + (offset[0]/200), 3),
+            round(ORIGIN[1] + (offset[1]/200), 3)
         )
 
-        for business in getAll(location):
+        for business in get_all(location):
             writer.writerow(business)

@@ -1,0 +1,45 @@
+amazing / fantastic / awesome / excellent / wonderful
+average / mediocre / decent / okay
+awful / disappointing / terrible
+
+arrogant / rude / attitude
+friendly
+
+cheap / inexpensive
+expensive / pricey
+
+crowded / busy
+
+adorable / cute
+
+vegan / vegetarian
+
+interesting / unique
+
+
+
+hipster
+authentic
+trendy
+artsy / creative
+gritty
+hippie
+students / study
+"open late"
+touristy
+douchey
+freelancer / work
+
+-- COMPUTED --
+
+yuppie
+hipster
+vegetarian
+touristy
+artsy
+crowded
+cheap
+expensive
+study
+rude
+friendly

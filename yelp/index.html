@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<head>
+  <title>NYC Neighborhood Traits</title>
+
+  <style>
+    div#title {
+      width: 100%;
+      text-align: center;
+      height: 20px;
+      padding: 20px;
+      font-size: 20px;
+    }
+    .selected {
+      fill:rgb(158,202,225);
+    }
+    ul#list {
+      text-align: center;
+    }
+    ul#list li {
+      list-style-type: none;
+      padding: 10px;
+      background-color: rgb(158,202,225);
+      display: inline-block;
+      cursor: pointer;
+    }
+    ul#list li.selected {
+      background-color: rgb(0,202,225);
+    }
+  </style>
+
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+  <script src="http://d3js.org/queue.v1.min.js"></script>
+  <script src="https://d3js.org/d3-color.v1.min.js"></script>
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+  <script src="https://d3js.org/d3-scale.v2.min.js"></script>
+</head>
+<body>
+  <div id="title">
+  </div>
+  <div id="map">
+  </div>
+  <div id="words">
+    <ul id="list">
+      <li onClick="setWord('expensive')" class="selected">expensive</li>
+      <li onClick="setWord('cheap')">cheap</li>
+      <li onClick="setWord('crowded')">crowded</li>
+      <li onClick="setWord('hipster')">hipster</li>
+      <li onClick="setWord('vegetarian')">vegetarian</li>
+      <li onClick="setWord('rude')">rude</li>
+      <li onClick="setWord('study')">study</li>
+    </ul>
+  </div>
+
+  <script>
+    var width = 960,
+        height = 600;
+
+    var nycMap = d3.map();
+
+    var scale = d3.scaleLinear()
+        .domain([0, 0.05])
+        .range([0, 1]);
+
+    var projection = d3.geo.mercator()
+        .center([-74.02, 40.72])
+        .scale(50000)
+        .translate([(width) / 2, (height)/2]);
+
+    var path = d3.geo.path()
+        .projection(projection);
+
+    var svg = d3.select("#map").append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    queue()
+        .defer(d3.json, "./pediacitiesnycneighborhoods.geojson")
+        .defer(d3.json, "./new_york.json")
+        .await(ready);
+
+    function featureColor(feature, word) {
+        var total = nycMap.get(feature.properties["@id"])["review_count"];
+        var count = nycMap.get(feature.properties["@id"])["word_data"][word];
+        if (total == 0) {
+            return d3.interpolateYlOrRd(0);
+        } else {
+            return d3.interpolateYlOrRd(scale(count / total));
+        }
+    };
+
+    function ready(error, nyc, words) {
+        for (var id in words) {
+            nycMap.set(id, words[id]);
+        }
+
+        if (error) throw error;
+
+        svg.append("g")
+            .attr("class", "nyc")
+          .selectAll("path")
+            .data(nyc.features)
+          .enter().append("path")
+            .on("mouseover", handleMouseOver)
+            .on("mouseout", handleMouseOut)
+            .attr("fill", function(f) {
+                return featureColor(f, "expensive");
+            })
+            .attr("stroke", "black")
+            .attr("d", path);
+    };
+
+
+    function setWord(word) {
+      svg.selectAll("path").attr("fill", function(f) {
+          return featureColor(f, word);
+      });
+      var list = document.getElementById("list");
+      var items = list.getElementsByTagName("li");
+      for (var i = 0; i < items.length; i++) {
+          var item = items[i];
+          if (item.innerText === word) {
+              items[i].setAttribute("class", "selected");
+          } else {
+              items[i].setAttribute("class", "");
+          }
+      }
+    };
+
+    function handleMouseOver(d, i) {
+        d3.select(this).attr({class: "selected"});
+        document.getElementById("title").innerText = d.properties.neighborhood;
+    };
+
+    function handleMouseOut(d, i) {
+        d3.select(this).attr({class: ""});
+        document.getElementById("title").innerText = "";
+    };
+  </script>
+</body>

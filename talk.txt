@@ -1,0 +1,12 @@
+var puppeteer = require('puppeteer');
+
+var browser = puppeteer.launch({headless: false}).then(b => browser = b);
+var page = browser.newPage().then(p => page = p);
+
+page.goto('https://www.yelp.com/biz/bibble-and-sip-new-york-2');
+
+page.evaluate(function() {
+    return document.getElementsByClassName("review-wrapper")[1].innerText;
+}).then(r => console.log(r));
+
+page.click("a.next");

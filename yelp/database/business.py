@@ -1,9 +1,9 @@
 from orator import Model
 from orator.orm import belongs_to_many
 from orator.orm import has_many
-import models.category
-import models.review
 
+import database.category
+import database.review
 
 class Business(Model):
     __timestamps__ = False
@@ -11,8 +11,8 @@ class Business(Model):
 
     @belongs_to_many('categorizations')
     def categories(self):
-        return models.category.Category
+        return database.category.Category
 
     @has_many
     def reviews(self):
-        return models.review.Review
+        return database.review.Review
